@@ -6,6 +6,7 @@ import (
 	"simple-todo-list/internal/app/todolist"
 	"simple-todo-list/internal/domain/todo_list"
 	"simple-todo-list/internal/dtos"
+	"time"
 )
 
 type Config struct {
@@ -39,9 +40,13 @@ func New(
 }
 
 func (a Application) CreateTodoList(ctx context.Context, in dtos.CreateTodoListInput) (dtos.CreateTodoListOutput, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	return a.create.Handle(ctx, in)
 }
 
 func (a Application) GetByIdTodoList(ctx context.Context, in dtos.GetByIdTodoListInput) (dtos.GetByIdTodoListOutput, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	return a.getById.Handle(ctx, in)
 }

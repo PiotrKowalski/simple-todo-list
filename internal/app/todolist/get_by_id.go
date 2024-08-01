@@ -5,7 +5,6 @@ import (
 	"simple-todo-list/internal/domain"
 	"simple-todo-list/internal/domain/todo_list"
 	"simple-todo-list/internal/dtos"
-	"time"
 )
 
 type GetByIdTodoListHandler struct {
@@ -13,12 +12,10 @@ type GetByIdTodoListHandler struct {
 }
 
 func (h *GetByIdTodoListHandler) Handle(ctx context.Context, input dtos.GetByIdTodoListInput) (dtos.GetByIdTodoListOutput, error) {
-	deadline, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	_, err := h.Repo.GetById(deadline, input.Id)
+	list, err := h.Repo.GetById(ctx, input.Id)
 	if err != nil {
 		return dtos.GetByIdTodoListOutput{}, err
 	}
 
-	return dtos.GetByIdTodoListOutput{}, nil
+	return dtos.NewDtoGetByIdTodoListOutput(*list), nil
 }

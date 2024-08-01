@@ -1,15 +1,22 @@
 package todo_list
 
-import (
-	"github.com/google/uuid"
-	"simple-todo-list/internal/dtos"
-)
+import "github.com/google/uuid"
 
-func NewFromCreateTodoListRequest(request dtos.CreateTodoListInput) *TodoList {
-	id := uuid.New().String()
-	return &TodoList{
-		Id:   id,
-		Name: request.Name,
+type Option func(*TodoList)
+
+func NewTodoList(name string, opts ...Option) *TodoList {
+	t := &TodoList{
+		Id:   uuid.New().String(),
+		Name: name,
 	}
+	for _, opt := range opts {
+		opt(t)
+	}
+	return t
+}
 
+func WithId(id string) Option {
+	return func(l *TodoList) {
+		l.Id = id
+	}
 }

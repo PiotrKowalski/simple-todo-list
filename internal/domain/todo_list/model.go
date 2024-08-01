@@ -33,23 +33,6 @@ func (t TodoList) AddEntry(e entry) {
 	t.Entries = append(t.Entries, e)
 }
 
-//func (t *TodoList) ToTodoListResponse() *api.TodoListResponse {
-//
-//	out := &api.TodoListResponse{}
-//	out.Id = t.Id.Hex()
-//	out.Name = t.Name
-//
-//	for _, e := range t.Entries {
-//		out.Entries = append(out.Entries, api.Entry{
-//			Id:          e.Id,
-//			Description: e.Description,
-//			Status:      api.Status(e.Status),
-//		})
-//	}
-//
-//	return out
-//}
-
 type entry struct {
 	Id          uint   `json:"id" bson:"id"`
 	Description string `json:"description" bson:"description"`

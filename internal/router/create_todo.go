@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 	"simple-todo-list/internal/dtos"
 )
@@ -14,7 +13,11 @@ func createTodoList(app app) func(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		log.Println(todoList)
+
+		err = c.Validate(&todoList)
+		if err != nil {
+			return err
+		}
 
 		res, err := app.CreateTodoList(c.Request().Context(), todoList)
 		if err != nil {
