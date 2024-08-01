@@ -6,8 +6,9 @@ type Option func(*TodoList)
 
 func NewTodoList(name string, opts ...Option) *TodoList {
 	t := &TodoList{
-		Id:   uuid.New().String(),
-		Name: name,
+		Id:      uuid.New().String(),
+		Name:    name,
+		Entries: []entry{},
 	}
 	for _, opt := range opts {
 		opt(t)

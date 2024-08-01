@@ -1,7 +1,5 @@
 package todo_list
 
-import "simple-todo-list/internal/domain"
-
 type Status string
 
 var (
@@ -10,12 +8,13 @@ var (
 )
 
 type TodoList struct {
-	domain.AggregateRoot
 	Id   string `bson:"_id" json:"id,omitempty"`
 	Name string `json:"name" bson:"name"`
 
 	Entries []entry `json:"entries" bson:"entries"`
 }
+
+func (t TodoList) IsAggregateRoot() {}
 
 func (t TodoList) GetId() string {
 	return t.Id
