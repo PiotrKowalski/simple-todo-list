@@ -6,6 +6,8 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/maragudk/gomponents v0.20.1
+	github.com/maragudk/gomponents-htmx v0.5.0
 	github.com/spf13/viper v1.19.0
 	go.mongodb.org/mongo-driver v1.16.0
 )

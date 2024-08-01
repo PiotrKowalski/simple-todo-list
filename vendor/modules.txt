@@ -58,6 +58,16 @@ github.com/leodido/go-urn/scim/schema
 # github.com/magiconair/properties v1.8.7
 ## explicit; go 1.19
 github.com/magiconair/properties
+# github.com/maragudk/gomponents v0.20.1
+## explicit; go 1.18
+github.com/maragudk/gomponents
+github.com/maragudk/gomponents/components
+github.com/maragudk/gomponents/html
+github.com/maragudk/gomponents/http
+# github.com/maragudk/gomponents-htmx v0.5.0
+## explicit; go 1.20
+github.com/maragudk/gomponents-htmx
+github.com/maragudk/gomponents-htmx/http
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable

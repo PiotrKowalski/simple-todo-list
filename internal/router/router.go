@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"simple-todo-list/internal/adapters/api/rest"
 	"simple-todo-list/internal/dtos"
+	"simple-todo-list/internal/view"
 )
 
 type app interface {
@@ -16,9 +18,8 @@ func New(app app) (*echo.Echo, error) {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	v1 := e.Group("/v1")
-	v1.POST("/todolist", createTodoList(app))
-	v1.GET("/todolist/:id", getByIdTodoList(app))
+	rest.New(e.Group("v1"), app)
+	view.NewRouter(e.Group(""))
 
 	return e, nil
 }
