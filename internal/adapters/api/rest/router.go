@@ -1,17 +1,19 @@
 package rest
 
 import (
-	"context"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"simple-todo-list/internal/dtos"
+	"simple-todo-list/internal/adapters/api/rest/app"
+	api_todolist "simple-todo-list/internal/adapters/api/rest/todolist"
+	api_user "simple-todo-list/internal/adapters/api/rest/user"
+	"simple-todo-list/pkg/auth"
 )
 
-type app interface {
-	CreateTodoList(ctx context.Context, in dtos.CreateTodoListInput) (dtos.CreateTodoListOutput, error)
-	GetByIdTodoList(ctx context.Context, in dtos.GetByIdTodoListInput) (dtos.GetByIdTodoListOutput, error)
-}
+func New(e *echo.Group, app app.RestApp) {
+	e.GET("/jwks", getJwks(app))
+	api_user.NewRouter(e.Group("/user"), app)
 
-func New(e *echo.Group, app app) {
-	e.POST("/todolist", createTodoList(app))
-	e.GET("/todolist/:id", getByIdTodoList(app))
+	restricted := e.Group("")
+	restricted.Use(echojwt.WithConfig(echojwt.Config{KeyFunc: auth.FetchJwks}))
+	api_todolist.NewRouter(restricted.Group("/todolist"), app)
 }

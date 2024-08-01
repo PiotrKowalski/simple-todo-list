@@ -6,12 +6,14 @@ import (
 	"github.com/labstack/echo/v4"
 	"simple-todo-list/internal/adapters/api/rest"
 	"simple-todo-list/internal/dtos"
+	"simple-todo-list/internal/dtos/user"
 	"simple-todo-list/internal/view"
 )
 
 type app interface {
 	CreateTodoList(ctx context.Context, in dtos.CreateTodoListInput) (dtos.CreateTodoListOutput, error)
 	GetByIdTodoList(ctx context.Context, in dtos.GetByIdTodoListInput) (dtos.GetByIdTodoListOutput, error)
+	Register(ctx context.Context, in user.RegisterInput) (user.RegisterOutput, error)
 }
 
 func New(app app) (*echo.Echo, error) {

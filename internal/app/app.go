@@ -2,10 +2,15 @@ package app
 
 import (
 	"context"
-	"simple-todo-list/internal/adapters/repo/mongodb"
+	"simple-todo-list/internal/adapters/repositories/mongodb"
+	"simple-todo-list/internal/adapters/services/auth"
+	"simple-todo-list/internal/adapters/services/hashing"
 	"simple-todo-list/internal/app/todolist"
+	userHandlers "simple-todo-list/internal/app/user"
 	"simple-todo-list/internal/domain/todo_list"
+	userDomain "simple-todo-list/internal/domain/user"
 	"simple-todo-list/internal/dtos"
+	"simple-todo-list/internal/dtos/user"
 	"time"
 )
 
@@ -14,8 +19,9 @@ type Config struct {
 }
 
 type Application struct {
-	create  todolist.CreateTodoListHandler
-	getById todolist.GetByIdTodoListHandler
+	create   todolist.CreateTodoListHandler
+	getById  todolist.GetByIdTodoListHandler
+	register userHandlers.RegisterHandler
 }
 
 func New(
@@ -28,14 +34,21 @@ func New(
 		return Application{}, err
 	}
 
-	todolistRepo, err := mongodb.NewRepoAdapter[todo_list.TodoList](client, "todolist", "todolists")
+	todolistRepo, err := mongodb.NewRepo[todo_list.TodoList](client, "todolists")
+	if err != nil {
+		return Application{}, err
+	}
+	userRepo, err := mongodb.NewRepo[userDomain.User](client, "users")
 	if err != nil {
 		return Application{}, err
 	}
 
+	hashingService := hashing.New()
+	authService := auth.New()
 	return Application{
-		create:  todolist.CreateTodoListHandler{Repo: todolistRepo},
-		getById: todolist.GetByIdTodoListHandler{Repo: todolistRepo},
+		create:   todolist.CreateTodoListHandler{Repo: todolistRepo},
+		getById:  todolist.GetByIdTodoListHandler{Repo: todolistRepo},
+		register: userHandlers.RegisterHandler{Repo: userRepo, HashService: hashingService, AuthService: authService},
 	}, nil
 }
 
@@ -49,4 +62,10 @@ func (a Application) GetByIdTodoList(ctx context.Context, in dtos.GetByIdTodoLis
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	return a.getById.Handle(ctx, in)
+}
+
+func (a Application) Register(ctx context.Context, in user.RegisterInput) (user.RegisterOutput, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	return a.register.Handle(ctx, in)
 }

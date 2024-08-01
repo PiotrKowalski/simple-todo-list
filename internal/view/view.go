@@ -38,7 +38,7 @@ func indexPage(now time.Time) (string, g.Node) {
 		H1(g.Text("Welcome to this example page")),
 		P(g.Text("I hope it will make you happy. 😄 It's using TailwindCSS for styling.")),
 		partial(now),
-		FormEl(Method("get"), Action("/v1/todolist/180146af-57b2-4629-b07b-55ab85218e89"), hx.Boost("true"), hx.Target("#partial"), hx.Swap("outerHTML"),
+		FormEl(Method("post"), Action("/"), hx.Boost("true"), hx.Target("#partial"), hx.Swap("outerHTML"),
 			Button(Type("submit"), g.Text(`Update time`),
 				Class("rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"),
 			),
