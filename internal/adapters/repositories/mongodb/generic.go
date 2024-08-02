@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"simple-todo-list/internal/domain"
+	"simple-todo-list/pkg/specification"
 )
 
 type Repo[T domain.AggregateRoot] struct {
@@ -38,6 +39,24 @@ func (t Repo[T]) GetById(ctx context.Context, id string) (*T, error) {
 	}
 
 	return &obj, nil
+}
+
+func (t Repo[T]) FindForMatching(ctx context.Context, specification specification.Specification[T]) ([]T, error) {
+	coll := t.client.Database(t.database).Collection(t.collection)
+
+	filter := ToBsonD[T](specification)
+	cursor, _ := coll.Find(ctx, filter)
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	var results []T
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+
 }
 
 func (t Repo[T]) Remove(id string) error {

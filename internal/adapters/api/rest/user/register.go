@@ -23,7 +23,7 @@ func Register(app app.RestApp) func(c echo.Context) error {
 
 		res, err := app.Register(c.Request().Context(), registerInput)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		utils.AddLocationHeaderToResponse(c, res.Id)
