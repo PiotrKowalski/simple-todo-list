@@ -1,4 +1,4 @@
-package user
+package dtos
 
 type RegisterInput struct {
 	Username string `json:"username" validate:"required,gte=1"`

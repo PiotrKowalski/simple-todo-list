@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"simple-todo-list/internal/adapters/api/rest/app"
 	"simple-todo-list/internal/adapters/api/rest/utils"
-	"simple-todo-list/internal/dtos/user"
+	"simple-todo-list/internal/dtos"
 )
 
 func Register(app app.RestApp) func(c echo.Context) error {
 	return func(c echo.Context) error {
-		var registerInput user.RegisterInput
+		var registerInput dtos.RegisterInput
 		err := c.Bind(&registerInput)
 		if err != nil {
 			return err

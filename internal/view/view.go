@@ -52,16 +52,18 @@ func Page(title, path string, body g.Node) g.Node {
 		Title:    title,
 		Language: "en",
 		Head: []g.Node{
-			Script(Src("https://cdn.tailwindcss.com?plugins=typography")),
+
+			Script(Src("https://cdn.tailwindcss.com?plugins=typography,forms")),
 			Script(Src("https://unpkg.com/htmx.org")),
 		},
 		Body: []g.Node{
+			Class("h-full"),
 			Navbar(path, []PageLink{
 				{Path: "/contact", Name: "Contact"},
 				{Path: "/about", Name: "About"},
 			}),
 			Container(
-				Prose(body),
+				MainConte(body),
 				PageFooter(),
 			),
 		},
@@ -104,8 +106,9 @@ func Container(children ...g.Node) g.Node {
 	return Div(Class("max-w-7xl mx-auto px-2 sm:px-6 lg:px-8"), g.Group(children))
 }
 
-func Prose(children ...g.Node) g.Node {
-	return Div(Class("prose"), g.Group(children))
+func MainConte(children ...g.Node) g.Node {
+	return Div(Class("prose"),
+		g.Group(children))
 }
 
 func PageFooter() g.Node {

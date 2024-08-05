@@ -7,4 +7,5 @@ import (
 
 func NewRouter(e *echo.Group, app app.RestApp) {
 	e.POST("/register", Register(app))
+	e.POST("/login", login(app))
 }
