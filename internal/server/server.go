@@ -36,5 +36,5 @@ func NewRESTService(router *echo.Echo, opts ...Option) *Server {
 }
 
 func (s *Server) Run() error {
-	return s.router.Start(fmt.Sprintf(":%s", s.port))
+	return s.router.Start(fmt.Sprintf("127.0.0.1:%s", s.port))
 }

@@ -17,10 +17,8 @@ func FetchJwks(token *jwt.Token) (interface{}, error) {
 		return nil, err
 	}
 
-	log.Println("ffff")
 	key, ok := keySet.Get(0)
 	if !ok {
-		log.Println("prob")
 		return nil, errors.New("key not found")
 	}
 	var rawKey interface{}

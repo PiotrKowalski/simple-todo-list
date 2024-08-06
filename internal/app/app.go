@@ -10,7 +10,6 @@ import (
 	"simple-todo-list/internal/domain/todo_list"
 	userDomain "simple-todo-list/internal/domain/user"
 	"simple-todo-list/internal/dtos"
-	"simple-todo-list/internal/dtos/user"
 	"time"
 )
 
@@ -22,6 +21,7 @@ type Application struct {
 	create   todolist.CreateTodoListHandler
 	getById  todolist.GetByIdTodoListHandler
 	register userHandlers.RegisterHandler
+	login    userHandlers.LoginHandler
 }
 
 func New(
@@ -49,6 +49,7 @@ func New(
 		create:   todolist.CreateTodoListHandler{Repo: todolistRepo},
 		getById:  todolist.GetByIdTodoListHandler{Repo: todolistRepo},
 		register: userHandlers.RegisterHandler{Repo: userRepo, HashService: hashingService, AuthService: authService},
+		login:    userHandlers.LoginHandler{Repo: userRepo, HashService: hashingService, AuthService: authService},
 	}, nil
 }
 
@@ -64,8 +65,14 @@ func (a Application) GetByIdTodoList(ctx context.Context, in dtos.GetByIdTodoLis
 	return a.getById.Handle(ctx, in)
 }
 
-func (a Application) Register(ctx context.Context, in user.RegisterInput) (user.RegisterOutput, error) {
+func (a Application) Register(ctx context.Context, in dtos.RegisterInput) (dtos.RegisterOutput, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	return a.register.Handle(ctx, in)
+}
+
+func (a Application) Login(ctx context.Context, in dtos.LoginInput) (dtos.LoginOutput, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	return a.login.Handle(ctx, in)
 }
