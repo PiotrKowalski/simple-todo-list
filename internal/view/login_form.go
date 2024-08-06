@@ -3,30 +3,58 @@ package view
 import (
 	"github.com/labstack/echo/v4"
 	g "github.com/maragudk/gomponents"
+	hx "github.com/maragudk/gomponents-htmx"
+	hxhttp "github.com/maragudk/gomponents-htmx/http"
 	. "github.com/maragudk/gomponents/html"
-	"time"
+	"net/http"
+	"simple-todo-list/internal/dtos"
 )
 
-func createLoginPageHandler() echo.HandlerFunc {
+func createLoginPageHandler(app app) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		now := time.Now()
-		title, body := loginPage(now)
-		return Page(title, c.Request().URL.Path, body).Render(c.Response())
+
+		title, body := loginPage()
+		return Page(title, c.Request().URL.Path, body, user{}).Render(c.Response())
 	}
 }
 
-func loginPage(now time.Time) (string, g.Node) {
+func createLoginPageActionHandler(app app) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		params, err := c.FormParams()
+		if err != nil {
+			return err
+		}
+		login, err := app.Login(c.Request().Context(), dtos.LoginInput{
+			Username: params.Get("username"),
+			Password: params.Get("password"),
+		})
+		if err != nil {
+			return loginError(err.Error()).Render(c.Response())
+		}
+
+		c.SetCookie(&http.Cookie{Name: "Authorization", Value: login.JWT})
+		hxhttp.SetRedirect(c.Response().Header(), "/")
+		//err = c.Redirect(http.StatusSeeOther, "/")
+		//if err != nil {
+		//	return err
+		//}
+
+		return nil
+	}
+}
+
+func loginPage() (string, g.Node) {
 	return "Login Page",
-		Div(Class("mx-auto flex min-h-full flex-col justify-center px-6 py-12 lg:px-8"),
+		Div(Class("flex min-h-full flex-col justify-center px-6 py-12 lg:px-8"),
 			Div(Class("sm:mx-auto sm:w-full sm:max-w-sm"),
 				Img(Class("x-auto h-10 w-auto"), Src("https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"), Alt("Your Company")),
 				H2(Class("mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"), g.Text("Sign in to your account")),
 			),
-			Div(Class("mt-10 sm:mx:auto sm:w-full sm:max-w-sm"),
-				FormEl(Class("space-y-6"), Action("#"), Method("POST"),
+			Div(Class("mt-10 sm:mx-auto sm:w-full sm:max-w-sm"),
+				FormEl(Class("space-y-6"), Action("/login"), Method("POST"), hx.Boost("true"), hx.Target("#error"), hx.Swap("innerHTML"),
 					Div(
-						Label(For("email"), Class("block text-sm font-medium leading-6 text-gray-900"), g.Text("Email address")),
-						Div(Class("mt-2"), Input(ID("email"), Name("email"), Type("email"), AutoComplete("email"), Class("block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"), Required())),
+						Label(For("username"), Class("block text-sm font-medium leading-6 text-gray-900"), g.Text("Username")),
+						Div(Class("mt-2"), Input(ID("username"), Name("username"), Type("text"), AutoComplete("username"), Class("block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"), Required())),
 					),
 					Div(
 						Div(Class("flex items-center justify-between"),
@@ -42,6 +70,9 @@ func loginPage(now time.Time) (string, g.Node) {
 						Button(Type("submit"), g.Text("Sign in"), Class("flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600")),
 					),
 				),
+
+				Div(Class(""), ID("error"), hx.Trigger("login-failed")),
+
 				P(Class("mt-10 text-center text-sm text-gray-500"),
 					g.Text("Not a member?  "),
 					A(Href("#"), Class("font-semibold leading-6 text-indigo-600 hover:text-indigo-500"), g.Text("Sign up")),
@@ -61,6 +92,18 @@ func loginPage(now time.Time) (string, g.Node) {
 	//	),
 	//)
 }
+
+func loginError(text string) g.Node {
+	return Div(Class("bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4"), Role("alert"),
+		P(Class("font-bold"), g.Text("Login Error")),
+		P(g.Text(text)))
+
+}
+
+//<div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
+//<p class="font-bold">Be Warned</p>
+//<p>Something not ideal might be happening.</p>
+//</div>
 
 //<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
 //<form class="space-y-6" action="#" method="POST">

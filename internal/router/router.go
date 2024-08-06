@@ -13,7 +13,7 @@ func New(app app.RestApp) (*echo.Echo, error) {
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	rest.New(e.Group("v1"), app)
-	view.NewRouter(e.Group(""))
+	view.NewRouter(e.Group(""), app)
 
 	return e, nil
 }

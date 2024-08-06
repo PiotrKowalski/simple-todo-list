@@ -1,20 +1,24 @@
 package view
 
 import (
+	"errors"
 	"github.com/labstack/echo/v4"
 	g "github.com/maragudk/gomponents"
 	hx "github.com/maragudk/gomponents-htmx"
 	hxhttp "github.com/maragudk/gomponents-htmx/http"
 	c "github.com/maragudk/gomponents/components"
 	. "github.com/maragudk/gomponents/html"
+	"log"
+	"net/http"
+	auth2 "simple-todo-list/pkg/auth"
 	"time"
 )
 
-func createHandler(title string, body g.Node) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return Page(title, c.Request().URL.Path, body).Render(c.Response())
-	}
-}
+//	func createHandler(title string, body g.Node) echo.HandlerFunc {
+//		return func(c echo.Context) error {
+//			return Page(title, c.Request().URL.Path, body).Render(c.Response())
+//		}
+//	}
 func createUpdateTimeHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if hxhttp.IsBoosted(c.Request().Header) {
@@ -29,7 +33,18 @@ func createIndexPageHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		now := time.Now()
 		title, body := indexPage(now)
-		return Page(title, c.Request().URL.Path, body).Render(c.Response())
+
+		auth, err := c.Cookie("Authorization")
+		if !errors.Is(err, http.ErrNoCookie) {
+			log.Println("auth vaule", auth.Value)
+			claims, _ := auth2.ExtractClaims(auth.Value)
+			log.Println(claims)
+			return Page(title, c.Request().URL.Path, body, user{username: claims.Username}).Render(c.Response())
+
+			return err
+		}
+
+		return Page(title, c.Request().URL.Path, body, user{}).Render(c.Response())
 	}
 }
 
@@ -46,7 +61,12 @@ func indexPage(now time.Time) (string, g.Node) {
 	)
 }
 
-func Page(title, path string, body g.Node) g.Node {
+type user struct {
+	username string
+	role     string
+}
+
+func Page(title, path string, body g.Node, user user) g.Node {
 	// HTML5 boilerplate document
 	return c.HTML5(c.HTML5Props{
 		Title:    title,
@@ -58,57 +78,26 @@ func Page(title, path string, body g.Node) g.Node {
 		},
 		Body: []g.Node{
 			Class("h-full"),
-			Navbar(path, []PageLink{
-				{Path: "/contact", Name: "Contact"},
-				{Path: "/about", Name: "About"},
+			navbar(user, path, []pageLink{
+				{Path: "/", Name: "Home"},
+				{Path: "/todo-lists", Name: "Todo lists"},
 			}),
 			Container(
-				MainConte(body),
+				MainContent(body),
 				PageFooter(),
 			),
 		},
 	})
 }
 
-type PageLink struct {
-	Path string
-	Name string
-}
-
-func Navbar(currentPath string, links []PageLink) g.Node {
-	return Nav(Class("bg-gray-700 mb-4"),
-		Container(
-			Div(Class("flex items-center space-x-4 h-16"),
-				NavbarLink("/", "Home", currentPath == "/"),
-
-				// We can Map custom slices to Nodes
-				g.Group(g.Map(links, func(l PageLink) g.Node {
-					return NavbarLink(l.Path, l.Name, currentPath == l.Path)
-				})),
-			),
-		),
-	)
-}
-
-// NavbarLink is a link in the Navbar.
-func NavbarLink(path, text string, active bool) g.Node {
-	return A(Href(path), g.Text(text),
-		// Apply CSS classes conditionally
-		c.Classes{
-			"px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-gray-700": true,
-			"text-white bg-gray-900":                           active,
-			"text-gray-300 hover:text-white hover:bg-gray-700": !active,
-		},
-	)
-}
-
 func Container(children ...g.Node) g.Node {
 	return Div(Class("max-w-7xl mx-auto px-2 sm:px-6 lg:px-8"), g.Group(children))
 }
 
-func MainConte(children ...g.Node) g.Node {
-	return Div(Class("prose"),
-		g.Group(children))
+func MainContent(children ...g.Node) g.Node {
+	//return Div(Class("prose"),
+	//	g.Group(children))
+	return g.Group(children)
 }
 
 func PageFooter() g.Node {
